@@ -8,6 +8,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 """
+Created on Thurs Nov 26, 2020 (rzala)
+"""
+
+"""
 This script is intended to read the spectra files ('.ISD') saved by Specwin Pro
 It iterates through a folder of these files
 For each file it extracts the source current, and the spectrum data
@@ -38,7 +42,8 @@ save_filename               - name of excel file (string)
 data_folder = os.getcwd() + \
               '\\test_data\\B2-10um_2019-08-11_Green_Prolux_Ref_Reflector\\LED1_P1N2'
 
-important_current_values = [0.001, 0.005, 0.01, 0.1, 0.5]
+important_current_values = [0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
+important_current_values_scientific = ["{:.2E}".format(value/1000) for value in important_current_values]
 
 save_folder = data_folder
 save_filename = [re.split(r'\\', data_folder)][0][-1] + ' Spectra'
@@ -171,10 +176,10 @@ excel_file = pathlib.Path(save_folder + "\\" + save_filename + ".xlsx")
 if excel_file.exists():
     print("Excel file exists")
     os.remove(excel_file)
-    print("Delete file")
+    print("Deleted existing file, made new file")
 else:
     print("Excel file does not exist")
-    print("Making new file")
+    print("Made new file")
 
 with pd.ExcelWriter(excel_file) as xls_wr:
     all_spectra_df.to_excel(xls_wr, "All Spectra")
@@ -185,13 +190,15 @@ wavelength = specified_spectra_df.loc[:, cols[0]]  # extract the wavelength colu
 
 # Extract the columns corresponding to the desired current values
 # Plot those columns, setting the legend label as the column label
+j = 0
 for i in cols[1:]:
     power = specified_spectra_df.loc[:, i]
-    plt.plot(wavelength, power, label=i)
+    plt.plot(wavelength, power, label=important_current_values_scientific[j]+' A')
+    j = j+1
 
 # Plot parameters (title, axis titles, legend, etc.)
 plt.xlabel('Wavelength (nm)')
-plt.ylabel('Power (W/nm)')
+plt.ylabel('Radiant Flux (W/nm)')
 plt.title('Emission Spectra')
 plt.legend()
 plt.show()
